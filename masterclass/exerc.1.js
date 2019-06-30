@@ -1,22 +1,41 @@
-// var temp = "cafe_-.ti.ria@#    !";
-// temp = temp.replace(/[^a-zA-Z0-9]+/g,'');
-
-// console.log(temp)
 let comando = "create table author (id number, name string, age number, city string, state string, country string)"
 
-function extractNameTable(comando){
-    comando = comando.match(/create table (\w+)/)
-    let tableName = comando[1];
+function extractNameTable(stringQuery) {
+    stringQuery = stringQuery.match(/create table (\w+)/)
+    let tableName = stringQuery[1];
     return tableName;
 }
 
-function extractColumn(comando){
-    // comando = comando.match(/[^\(][\w\s\,]+\)$/g);
-    comando = comando.match(/\((.+)\)/);
-    // let tableColumn = comando[0].replace(/\)+/g, "").split(",");
-    return comando[1].split(", ");
+function extractColumn(stringQuery) {
+    stringQuery = stringQuery.match(/\((.+)\)/);
+    return stringQuery[1].split(", ");
 }
 
+function formartColumns(stringQuery) {
+    const fieldsTables = extractColumn(stringQuery);
+    let columns = {}
 
-// console.log(extractNameTable(comando))
-console.log(extractColumn(comando))
+    for (let a of fieldsTables) {
+        let valueColumn = a.split(" ")
+        let columnIndex = valueColumn[0]
+        let columnValue = valueColumn[1]
+        columns[columnIndex] = columnValue
+    }
+    return columns
+}
+
+function createTableObject(stringQuery) {
+    const nameTable = extractNameTable(stringQuery)
+    const columnsTable = formartColumns(stringQuery)
+    const objectTable = {
+        tables: {}
+    }
+    objectTable.tables[nameTable] = {
+        columns: columnsTable
+    }
+    
+    return JSON.stringify(objectTable);
+}
+
+console.log(createTableObject(comando))
+

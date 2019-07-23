@@ -18,6 +18,9 @@ const database = {
         }
 
         let columns = parseStatement[2]
+
+        console.log(columns)
+        return;
         columns = columns.split(", ")
 
         for (let column of columns) {

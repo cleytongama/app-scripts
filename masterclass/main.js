@@ -1,20 +1,17 @@
-function Parser() {
+const Parser = function () {
+    let commands = new Map()
 
-    this.initDataMap = [
-        ["select", /select (.+) from ([a-z]+)(?: where (.+))?/],
-        ["createTable", /create table ([a-z]+) \((.+)\)/],
-        ["insert", /insert into ([a-z]+) \((.+)\) values \((.+)\)/],
-        ["delete", /delete from ([a-z]+)(?: where (.+))?/]
-    ]
-
-    this.comands = new Map(this.initDataMap)
+    commands.set("createTable", /create table ([a-z]+) \((.+)\)/)
+    commands.set("insert", /insert into ([a-z]+) \((.+)\) values \((.+)\)/)
+    commands.set("select", /select (.+) from ([a-z]+)(?: where (.+))?/)
+    commands.set("delete", /delete from ([a-z]+)(?: where (.+))?/)
 
     this.parse = function (statement) {
-        for (let [name, value] of this.comands) {
-            const parsedStatement = statement.match(value);
+        for (let [command, regexp] of commands) {
+            const parsedStatement = statement.match(regexp)
             if (parsedStatement) {
                 return {
-                    command: name,
+                    command,
                     parsedStatement
                 }
             }
@@ -22,9 +19,6 @@ function Parser() {
     }
 }
 
-// const prs = new Parser()
-
-// console.log(prs.parse("create table author (id number, name string, age number, city string, state string, country string)"))
 function DatabaseError(statement, message) {
     this.statement = statement;
     this.message = message;
@@ -35,7 +29,7 @@ const database = {
     parser: new Parser(),
     createTable(parseStatement) {
         const tableName = parseStatement[1]
-        
+
         this.tables[tableName] = {
             columns: {},
             data: []
@@ -110,8 +104,8 @@ const database = {
     },
     execute(statement) {
 
-        const {command , parsedStatement}  =  this.parser.parse(statement);
-  
+        const { command, parsedStatement } = this.parser.parse(statement);
+
         if (command) {
             return this[command](parsedStatement);
         }
@@ -126,8 +120,7 @@ try {
     database.execute("insert into author (id, name, age) values (1, Douglas Crockford, 62)");
     database.execute("insert into author (id, name, age) values (2, Linus Torvalds, 47)");
     database.execute("insert into author (id, name, age) values (3, Martin Fowler, 54)");
-    // console.log(JSON.stringify(database.execute("select id, name, age from author where id = 1"), undefined, " "));
-    console.log(JSON.stringify(database.execute("delete from author where id = 2"), undefined, " "));
+    database.execute("delete from author where id = 2");
     console.log(JSON.stringify(database.execute("select name, age from author"), undefined, " "));
 
 

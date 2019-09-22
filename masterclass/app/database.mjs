@@ -1,5 +1,5 @@
-import Parser from './parser'
 import DatabaseError from './database-error'
+import Parser from './parser'
 
 export default class Database {
     constructor() {
@@ -84,14 +84,17 @@ export default class Database {
     }
 
     execute(statement) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const result = this.parser.parse(statement);
+                if (result) {
+                    resolve(this[result.command](result.parsedStatement));
+                }
+                
+                const message = `Syntax error: "${statement}"`
 
-        const { command, parsedStatement } = this.parser.parse(statement);
-
-        if (command) {
-            return this[command](parsedStatement);
-        }
-
-        const message = `Syntax error: "${statement}"`
-        throw new DatabaseError(statement, message);
+                reject(new DatabaseError(statement, message))
+            }, 1000)
+        })
     }
 }
